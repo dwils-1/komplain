@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Complaint Form</title>
+    <style>
+        /* Tema Klasik Putih & Profesional */
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background-color: #f8f9fa; 
+            padding: 20px; 
+            margin: 0;
+            min-height: 100vh;
+            display: flex; 
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+        .form-container { 
+            background: #ffffff; 
+            padding: 40px; 
+            border-radius: 4px; 
+            width: 100%; 
+            max-width: 450px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+            border: 1px solid #e0e0e0;
+        }
+        h2 { 
+            text-align: center; 
+            color: #1a1a1a; 
+            margin-bottom: 5px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-size: 20px;
+        }
+        .sub-header {
+            text-align: center;
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+        label { 
+            display: block; 
+            margin-top: 15px; 
+            font-weight: 600; 
+            color: #444;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+        input, textarea { 
+            width: 100%; 
+            padding: 12px; 
+            margin-top: 5px; 
+            border: 1px solid #ccc; 
+            border-radius: 3px; 
+            box-sizing: border-box; 
+            font-size: 15px;
+            transition: all 0.2s ease;
+            background-color: #fff;
+        }
+        input:focus, textarea:focus { 
+            border-color: #000; 
+            outline: none; 
+            box-shadow: 0 0 0 2px rgba(0,0,0,0.05);
+        }
+        
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .note { 
+            font-size: 12px; 
+            margin-top: 25px; 
+            padding: 15px;
+            background: #f9f9f9; 
+            border-left: 3px solid #333; 
+            color: #666;
+            line-height: 1.6;
+        }
+
+        button { 
+            width: 100%; 
+            background: #1a1a1a; 
+            color: white; 
+            padding: 16px; 
+            border: none; 
+            border-radius: 3px; 
+            cursor: pointer; 
+            font-size: 14px; 
+            margin-top: 25px; 
+            font-weight: bold; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background: #333;
+        }
+        button:active { 
+            background: #000;
+            transform: translateY(1px); 
+        }
+
+        @media (max-width: 480px) {
+            .form-container {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>Complaint Form</h2>
+    <div class="sub-header">Internal System - Customer Care Services</div>
+    
+    <form id="complaintForm">
+        <label>ID Pelanggan</label>
+        <input type="number" id="id_pelanggan" inputmode="numeric" placeholder="Contoh: 12345678" required>
+
+        <label>Nama Lengkap</label>
+        <input type="text" id="nama" placeholder="Sesuai identitas resmi" required>
+
+        <label>Alamat Pemasangan</label>
+        <textarea id="alamat" rows="2" placeholder="Detail jalan, nomor rumah, blok/cluster" required></textarea>
+
+        <label>Detail Kendala</label>
+        <textarea id="kendala" rows="3" placeholder="Deskripsikan masalah secara singkat dan jelas" required></textarea>
+
+        <label>Kontak WhatsApp</label>
+        <input type="tel" id="kontak" inputmode="numeric" placeholder="Contoh: 0812XXXXXXXX" required>
+
+        <div class="note">
+            <strong>PROSEDUR PELAPORAN:</strong><br>
+            • Kendala koneksi lambat wajib melampirkan hasil uji kecepatan (speedtest).<br>
+            • Jika indikator router LOS Merah, mohon siapkan dokumentasi video unit.
+        </div>
+
+        <button type="button" onclick="sendToWhatsApp()">Kirim Laporan ke WhatsApp</button>
+    </form>
+</div>
+
+<script>
+    function sendToWhatsApp() {
+        const phone = "6281908999242"; 
+        
+        const id = document.getElementById('id_pelanggan').value;
+        const nama = document.getElementById('nama').value;
+        const alamat = document.getElementById('alamat').value;
+        const kendala = document.getElementById('kendala').value;
+        const kontak = document.getElementById('kontak').value;
+
+        const now = new Date();
+        const hari = now.toLocaleDateString('id-ID', { weekday: 'long' });
+        const tanggal = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+        // Update Judul: COMPLAINT CUSTOMER
+        // Update Letak: Hari di atas, Tanggal di bawah
+        const message = `*COMPLAINT CUSTOMER*%0A` +
+                        `----------------------------%0A` +
+                        `Hari : ${hari}%0A` +
+                        `Tanggal: ${tanggal}%0A%0A` +
+                        `• *ID Pelanggan* : ${id}%0A` +
+                        `• *Nama* : ${nama.toUpperCase()}%0A` +
+                        `• *Alamat* : ${alamat}%0A` +
+                        `• *Kendala* : ${kendala}%0A` +
+                        `• *No. Kontak* : ${kontak}%0A%0A` +
+                        `Mohon untuk segera ditindaklanjuti. Terima kasih.`;
+
+        const whatsappURL = `https://api.whatsapp.com/send?phone=${phone}&text=${message}`;
+        
+        if(id && nama && alamat && kendala && kontak) {
+            window.open(whatsappURL, '_blank');
+        } else {
+            alert("Mohon lengkapi seluruh kolom formulir.");
+        }
+    }
+</script>
+
+</body>
+</html>
