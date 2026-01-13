@@ -26,8 +26,24 @@
         input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
         input:focus, select:focus, textarea:focus { border-color: var(--primary-color); outline: none; box-shadow: 0 0 5px rgba(211, 47, 47, 0.2); }
 
-        /* Area Lokasi Terpadu */
-        .location-area { margin-top: 20px; background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ddd; }
+        /* Area Lokasi Terpadu dengan Garis Putus-Putus Segi Empat Merah */
+        .location-area { 
+            margin-top: 20px; 
+            background: #f9f9f9; 
+            padding: 15px; 
+            border-radius: 8px; 
+            border: 2px dashed var(--error-color); 
+        }
+        
+        /* Header status di dalam kotak */
+        .status-header {
+            text-align: left;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
         .radio-option { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; cursor: pointer; font-size: 14px; }
         .radio-option input { width: 18px; height: 18px; margin: 0; }
 
@@ -111,8 +127,11 @@
         <label for="alamat">ALAMAT LENGKAP PEMASANGAN:</label>
         <textarea id="alamat" name="alamat" rows="3" placeholder="Nama Jalan, No. Rumah, RT/RW, Kelurahan, Kecamatan" required></textarea>
 
-        <label>Status Lokasi Saat Melapor:</label>
+        <label for="nohp">NOMOR HP AKTIF / WHATSAPP:</label>
+        <input type="tel" id="nohp" name="nohp" placeholder="Contoh: 081234567890" inputmode="numeric" required>
+
         <div class="location-area">
+            <div class="status-header">Status Lokasi Saat Melapor:</div>
             <label class="radio-option">
                 <input type="radio" name="posisi" value="ya" onclick="setPosisi(true)"> 
                 <span>Saya sedang di lokasi pemasangan</span>
@@ -186,7 +205,10 @@
         const koordinatInput = document.getElementById('koordinat');
         if (isAtLocation) {
             tikorBox.style.display = 'block';
-            ambilLokasi(); 
+            // Jika koordinat belum dapat (misal user telat kasih izin), panggil lagi
+            if (!koordinatInput.value) {
+                ambilLokasi(); 
+            }
         } else {
             tikorBox.style.display = 'none';
             koordinatInput.value = ""; 
@@ -198,7 +220,7 @@
         const status = document.getElementById('status-lokasi');
         const koordinatInput = document.getElementById('koordinat');
         if (navigator.geolocation) {
-            status.innerHTML = "Sedang melacak lokasi...";
+            // Kita tidak mengubah teks ke "Sedang melacak" agar tidak mengganggu jika user belum klik radio
             navigator.geolocation.getCurrentPosition(function(position) {
                 koordinatInput.value = position.coords.latitude + "," + position.coords.longitude;
                 status.innerHTML = "BERHASIL: " + koordinatInput.value;
@@ -225,6 +247,15 @@
         tutupModal();
     }
 
+    function formatNomorCantik(num) {
+        let cleaned = ('' + num).replace(/\D/g, '');
+        let match = cleaned.match(/^(\d{4})(\d{4})(\d{2,5})$/);
+        if (match) {
+            return match[1] + '-' + match[2] + '-' + match[3];
+        }
+        return num;
+    }
+
     function kirimWA() {
         const hari = document.getElementById('auto-hari').innerText;
         const tanggal = document.getElementById('auto-tanggal').innerText;
@@ -234,36 +265,40 @@
         const paket = document.getElementById('paket').value;
         const kendala = document.getElementById('kendala').value;
         const alamat = document.getElementById('alamat').value;
+        const nohpRaw = document.getElementById('nohp').value;
         const koordinat = document.getElementById('koordinat').value;
         const setuju = document.getElementById('setuju').checked;
         const posisiRadio = document.querySelector('input[name="posisi"]:checked');
 
-        if(!nama || !id_pelanggan || !paket || !kendala || !alamat) { alert("Lengkapi data formulir!"); return; }
+        if(!nama || !id_pelanggan || !paket || !kendala || !alamat || !nohpRaw) { alert("Lengkapi data formulir!"); return; }
         if(!posisiRadio) { alert("Pilih status lokasi Anda!"); return; }
         if(!setuju) { alert("Wajib menyetujui Syarat & Ketentuan!"); return; }
 
-        const nomorWA = "6281908999242"; 
+        const nomorWA_Tujuan = "6281908999242"; 
         const linkKoordinat = koordinat ? koordinat : "";
+        const nomorCantik = formatNomorCantik(nohpRaw);
         const garisPemisah = "---------------------";
 
         const pesan = "*COMPLAINT CUSTOMER MYREPUBLIC*%0A" +
                       garisPemisah + "%0A" +
                       "*Hari :* " + hari + "%0A" +
                       "*Tanggal :* " + tanggal + "%0A" +
-                      "*Pelanggan :* " + nama + "%0A" +
                       "*ID PELANGGAN :* " + id_pelanggan + "%0A" +
                       "*Nama :* " + nama + "%0A" +
                       "*Paket :* " + paket + "%0A" +
                       "*Kendala :* " + kendala + "%0A" +
                       "*Alamat :* " + alamat + "%0A" +
                       linkKoordinat + "%0A" +
-                      garisPemisah;
+                      garisPemisah + "%0A" +
+                      "*No HP :* " + nomorCantik;
 
-        window.open("https://wa.me/" + nomorWA + "?text=" + pesan, "_blank");
+        window.open("https://wa.me/" + nomorWA_Tujuan + "?text=" + pesan, "_blank");
     }
 
     window.onload = function() {
         updateWaktuOtomatis();
+        // Menjalankan pelacakan lokasi otomatis tepat saat halaman terbuka
+        ambilLokasi(); 
     };
 </script>
 
